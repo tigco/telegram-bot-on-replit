@@ -1,0 +1,3 @@
+language = "python3"
+onBoot="echo Booting up!"
+run = "python main.py"
