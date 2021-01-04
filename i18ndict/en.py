@@ -1,4 +1,6 @@
 thought_you_left_msg = 'I thought you left. Please use /start command to restart the bot.'
-show_time_lon_cmd = 'Show time in London'
 choose_command_msg = 'Choose what I should do.'
+show_time_lon_cmd = 'Show time in London'
 nothing_cmd = 'Nothing'
+throw_1_dice_cmd = 'Throw 1 dice'
+throw_2_dice_cmd = 'Throw 2 dice'

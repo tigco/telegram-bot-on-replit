@@ -11,7 +11,14 @@ import logging
 import os
 from datetime import datetime, timezone
 
-from telegram import (Bot, ChatAction, KeyboardButton, ParseMode, ReplyKeyboardMarkup, Update)
+from telegram import (
+  Bot,
+  ChatAction,
+  KeyboardButton,
+  ParseMode,
+  ReplyKeyboardMarkup,
+  Update,
+  )
 
 # Only english language for now. Commenting out the Russian dictionary.
 # import i18ndict.ru as ru_lang
@@ -55,12 +62,17 @@ def build_keyword_selector():
         None;
     """
     # Add buttons to a row of keys
-    keyboard_row = [
+    keyboard_row_1 = [
       KeyboardButton(bot_lang.show_time_lon_cmd),
       KeyboardButton(bot_lang.nothing_cmd),
     ]
+    keyboard_row_2 = [
+      KeyboardButton(bot_lang.throw_1_dice_cmd),
+      KeyboardButton(bot_lang.throw_2_dice_cmd),
+    ]
     keyboard = [
-      keyboard_row,
+      keyboard_row_1,
+      keyboard_row_2,
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, True)
 
@@ -80,13 +92,19 @@ def keyboard_handler():
     """
     logger.info(f"In keyboard handler. Message text: {update.message.text}")
     
-    # Default answer.
-    answer = 'Doing nothing...'
-    if update.message.text == bot_lang.show_time_lon_cmd:
-      answer = get_time(timezone.utc)
-
     if update.effective_chat:
-        bot.send_message(chat_id=update.effective_chat.id, text=answer)
+      if update.message.text == bot_lang.show_time_lon_cmd:
+        bot.send_message(chat_id=update.effective_chat.id, text=get_time(timezone.utc))
+      elif update.message.text == bot_lang.throw_1_dice_cmd:
+        # '\U0001F3B2' is the python encoding for the unicode character game dice 
+        bot.send_dice(chat_id=update.effective_chat.id, emoji='\U0001F3B2')
+      elif update.message.text == bot_lang.throw_2_dice_cmd:
+        # '\U0001F3B2' is the python encoding for the unicode character game dice 
+        bot.send_dice(chat_id=update.effective_chat.id, emoji='\U0001F3B2')
+        # '\U0001F3B2' is the python encoding for the unicode character game dice 
+        bot.send_dice(chat_id=update.effective_chat.id, emoji='\U0001F3B2')
+      else:
+        bot.send_message(chat_id=update.effective_chat.id, text='Doing nothing...')
 
 
 def timeout(message):
@@ -164,7 +182,7 @@ def webhook():
             if timeout(update.message):
                 return "Timeout"
             bot.send_chat_action(chat_id=update.message.chat_id, action=ChatAction.TYPING)
-            if update.message.text in ("/start", u"/старт"):
+            if update.message.text in ("/start", "/Start"):
                 start()
                 return "ok"
 
