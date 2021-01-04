@@ -99,9 +99,7 @@ def keyboard_handler():
         # '\U0001F3B2' is the python encoding for the unicode character game dice 
         bot.send_dice(chat_id=update.effective_chat.id, emoji='\U0001F3B2')
       elif update.message.text == bot_lang.throw_2_dice_cmd:
-        # '\U0001F3B2' is the python encoding for the unicode character game dice 
         bot.send_dice(chat_id=update.effective_chat.id, emoji='\U0001F3B2')
-        # '\U0001F3B2' is the python encoding for the unicode character game dice 
         bot.send_dice(chat_id=update.effective_chat.id, emoji='\U0001F3B2')
       else:
         bot.send_message(chat_id=update.effective_chat.id, text='Doing nothing...')
