@@ -8,6 +8,7 @@ authors = ["Tigco <4tjmir@gmail.com>"]
 python = "^3.8"
 python-telegram-bot = "^13.1"
 flask = "^1.1.2"
+waitress = "^1.4.4"
 
 [tool.poetry.dev-dependencies]
 
