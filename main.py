@@ -1,24 +1,25 @@
 #!/usr/bin/env python
-
 """Demo Telegram bot on repl.it.
 
 This program is dedicated to the public domain under the MIT License.
 """
 from flask import Flask, request, render_template
+
 app = Flask(__name__)
 
 import logging
 import os
+import re
 from datetime import datetime, timezone
 
 from telegram import (
-  Bot,
-  ChatAction,
-  KeyboardButton,
-  ParseMode,
-  ReplyKeyboardMarkup,
-  Update,
-  )
+    Bot,
+    ChatAction,
+    KeyboardButton,
+    ParseMode,
+    ReplyKeyboardMarkup,
+    Update,
+)
 
 # Only english language for now. Commenting out the Russian dictionary.
 # import i18ndict.ru as ru_lang
@@ -27,8 +28,9 @@ import i18ndict.en as en_lang
 bot_lang = en_lang
 
 # Enable logging
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Define global vars and constants
@@ -49,7 +51,7 @@ def start():
     if update.message.from_user.username:
         user_data['username'] = update.message.from_user.username
         logger.info('Username {}'.format(user_data['username']))
-    
+
     # Display keyboard
     build_keyword_selector()
 
@@ -63,24 +65,24 @@ def build_keyword_selector():
     """
     # Add buttons to a row of keys
     keyboard_row_1 = [
-      KeyboardButton(bot_lang.show_time_lon_cmd),
-      KeyboardButton(bot_lang.nothing_cmd),
+        KeyboardButton(bot_lang.message_any_number),
+        KeyboardButton(bot_lang.show_time_lon_cmd),
     ]
     keyboard_row_2 = [
-      KeyboardButton(bot_lang.throw_1_dice_cmd),
-      KeyboardButton(bot_lang.throw_2_dice_cmd),
+        KeyboardButton(bot_lang.throw_1_dice_cmd),
+        KeyboardButton(bot_lang.throw_2_dice_cmd),
     ]
     keyboard = [
-      keyboard_row_1,
-      keyboard_row_2,
+        keyboard_row_1,
+        keyboard_row_2,
     ]
     reply_markup = ReplyKeyboardMarkup(keyboard, True)
 
     if update.effective_chat:
-        bot.send_message(chat_id=update.effective_chat.id, 
-                        text=bot_lang.choose_command_msg, 
-                        parse_mode=ParseMode.MARKDOWN,
-                        reply_markup=reply_markup)
+        bot.send_message(chat_id=update.effective_chat.id,
+                         text=bot_lang.choose_command_msg,
+                         parse_mode=ParseMode.MARKDOWN,
+                         reply_markup=reply_markup)
 
 
 def keyboard_handler():
@@ -91,18 +93,36 @@ def keyboard_handler():
         None;
     """
     logger.info(f"In keyboard handler. Message text: {update.message.text}")
-    
+
     if update.effective_chat:
-      if update.message.text == bot_lang.show_time_lon_cmd:
-        bot.send_message(chat_id=update.effective_chat.id, text=get_time(timezone.utc))
-      elif update.message.text == bot_lang.throw_1_dice_cmd:
-        # '\U0001F3B2' is the python encoding for the unicode character game dice 
-        bot.send_dice(chat_id=update.effective_chat.id, emoji='\U0001F3B2')
-      elif update.message.text == bot_lang.throw_2_dice_cmd:
-        bot.send_dice(chat_id=update.effective_chat.id, emoji='\U0001F3B2')
-        bot.send_dice(chat_id=update.effective_chat.id, emoji='\U0001F3B2')
-      else:
-        bot.send_message(chat_id=update.effective_chat.id, text='Doing nothing...')
+        if update.message.text == bot_lang.show_time_lon_cmd:
+            bot.send_message(chat_id=update.effective_chat.id,
+                             text=get_time(timezone.utc))
+        elif update.message.text == bot_lang.throw_1_dice_cmd:
+            # '\U0001F3B2' is the python encoding for the unicode character game dice
+            bot.send_dice(chat_id=update.effective_chat.id, emoji='\U0001F3B2')
+        elif update.message.text == bot_lang.throw_2_dice_cmd:
+            bot.send_dice(chat_id=update.effective_chat.id, emoji='\U0001F3B2')
+            bot.send_dice(chat_id=update.effective_chat.id, emoji='\U0001F3B2')
+        elif update.message.text == bot_lang.message_any_number:
+            bot.send_message(chat_id=update.effective_chat.id,
+                             text=bot_lang.message_any_number_instructions)
+        else:
+            digits = re.sub('\D', '', update.message.text)
+            if digits:
+                telegram_link = f"{bot_lang.telegram_instructions} https://t.me/+{digits}"
+                whatsapp_link = f"{bot_lang.whatsap_instructions} https://wa.me/{digits}"
+                bot.send_message(chat_id=update.effective_chat.id,
+                                 text=telegram_link,
+                                 disable_web_page_preview=True)
+                bot.send_message(chat_id=update.effective_chat.id,
+                                 text=whatsapp_link,
+                                 disable_web_page_preview=True)
+                bot.send_message(chat_id=update.effective_chat.id,
+                                 text=bot_lang.troubleshoot_instructions)
+            else:
+                bot.send_message(chat_id=update.effective_chat.id,
+                                 text=bot_lang.final_instructions)
 
 
 def timeout(message):
@@ -122,8 +142,10 @@ def timeout(message):
         return False
     else:
         if update.effective_chat:
-            bot.send_message(chat_id=update.effective_chat.id, text=bot_lang.thought_you_left_msg)
-        logger.info('Dropped {} (age {}ms)'.format(update.update_id, event_age_ms))
+            bot.send_message(chat_id=update.effective_chat.id,
+                             text=bot_lang.thought_you_left_msg)
+        logger.info('Dropped {} (age {}ms)'.format(update.update_id,
+                                                   event_age_ms))
         return True
 
 
@@ -143,22 +165,22 @@ def get_message_age(message):
     return event_age_ms
 
 
-def get_time(local_timezone = timezone.utc):
-  return datetime.now(local_timezone).strftime("%d-%b-%Y (%H:%M:%S)")
+def get_time(local_timezone=timezone.utc):
+    return datetime.now(local_timezone).strftime("%d-%b-%Y (%H:%M:%S)")
 
 
 # Optional. Strictly speaking the decorator and function below code are not necessary for the
 # bot to work.
-# However, I recommend keeping this code. It lets us have the landing/status page (index.html) 
+# However, I recommend keeping this code. It lets us have the landing/status page (index.html)
 # for the bot. Additonally, we're using Uptime Robot to keep the bot up. If this code is
-# removed, Uptime Robot will receive 404 response when pinging the '/' route and report it as down. 
+# removed, Uptime Robot will receive 404 response when pinging the '/' route and report it as down.
 @app.route('/')
 def index():
-  return render_template("index.html")
+    return render_template("index.html")
 
 
 # The bot entry point. Telegram send HTTPS POST request whenever there is an update for the bot.
-# Therefore, we only accept the POST method. 
+# Therefore, we only accept the POST method.
 @app.route('/webhook', methods=['POST'])
 def webhook():
     """Webhook for the telegram bot.
@@ -179,7 +201,8 @@ def webhook():
         if update.message:
             if timeout(update.message):
                 return "Timeout"
-            bot.send_chat_action(chat_id=update.message.chat_id, action=ChatAction.TYPING)
+            bot.send_chat_action(chat_id=update.message.chat_id,
+                                 action=ChatAction.TYPING)
             if update.message.text in ("/start", "/Start"):
                 start()
                 return "ok"
@@ -193,4 +216,3 @@ if __name__ == "__main__":
     # app.run(host='0.0.0.0', port=8443)
     from waitress import serve
     serve(app, host="0.0.0.0", port=8443)
-
